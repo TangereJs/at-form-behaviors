@@ -1,0 +1,144 @@
+<script>
+  (function(namespace) {
+    namespace.AtFormBehaviorsValidation = {
+      properties: {
+        /**
+         * When true element's value is valid as in satisfies all constraints, both internal and extermal<br/>
+         * When false element's value doens't satisfy at least one external constraint or at least one internal constraint
+         * <br/>
+         * NOTE. This property is read only.
+         * @property valid
+         * @type Boolean
+         * @default true
+         */
+        valid: {
+          type: Boolean,
+          value: true,
+          readOnly: true,
+          notify: true
+        },
+        /**
+         * When error message is not empty, element's value is invalid <br/>
+         * Internal constraints and error messages are ignored
+         * <br/>
+         * @property errorMessage
+         * @type string
+         * @default ''
+         */
+        errorMessage: {
+          type: String,
+          value: '',
+          observer: 'errorMessageChanged'
+        }
+      },
+      /*
+       * Internal error message<br/>
+       * When an internal constraint is violated this property is populated with the error message
+       */
+      _errorMessage: '',
+      /*
+       * An array of validation functions<br/>
+       * These functions will be called in a loop to compute final value for valid property<br/>
+       * An element that includes this behavior should populate this array with functions
+       * that check internal constraints for that element <br/>
+       * Validation function must return true if the constraint it checks is satisfied. It must return false otherwise.<br/>
+       * NOTE. If you want to create a new array, add boundCheckRequired function to the new array.
+       * Else use Array.push function instead.<br/>
+       * An example of internal constraint would be required, min - max value, etc ...
+       */
+      _validationFunctions: [],
+      ready: function () {
+        // validation behavior expects that element that its included into has value property
+        var hasValue = this.value !== undefined;
+        if (hasValue) {
+          // since all at-form-* elements have required property there is a convenience function
+          // that checks required constraint
+          var boundCheckRequired = this._checkRequired.bind(this);
+          this._validationFunctions.push(boundCheckRequired);
+        }
+
+        // disabled and hide are not required, because we can coerce them to boolean
+        // if coerced value is false it doesn't affect computation of valid state
+      },
+      /**
+       * @function validate
+       * @return {Boolean} - true if all validation constraints are satisfied; false otherwise
+       */
+      validate: function () {
+        var valid = true;
+
+        // if this.hide is undefined its coerced to false
+        var isHidden = Boolean(this.hide);
+        // if this.disabled is undefined its coerced to false
+        var isDisabled = Boolean(this.disabled);
+        // check if external error message is set
+        var isExternalValid = this._isExternalValid();
+
+        if (!isHidden || !isDisabled) {
+          // if element is hidden or disabled validation should not be performed. Its valid by default
+          this._errorMessage = '';
+          var value = this.value;
+          valid = isExternalValid;
+
+          var i;
+          var validationFunctions = this._validationFunctions;
+          var length = validationFunctions.length;
+          for (var i = 0; valid && i < length; i++) {
+            var validationFunction = validationFunctions[i];
+            valid = valid && validationFunction(value);
+          }
+        }
+
+        var errorHtml = this.$.errorHtml;
+        if (errorHtml) {
+          if (!isExternalValid) {
+            // display the external error messsage
+            Polymer.dom(errorHtml).innerHTML = this.errorMessage;
+          } else if (!valid) {
+            // checking internal constraints failed; display internal error message
+            Polymer.dom(errorHtml).innerHTML = this._errorMessage;
+          } else {
+            // clear error message html
+            Polymer.dom(errorHtml).innerHTML = '';
+          }
+        } else {
+          console.log('Please provide html space for error messages with an html element with id of \'errorHtml\'.');
+        }
+
+        // update css classes in html
+        if (this._updateUIValidState) {
+          this._updateUIValidState(valid);
+        } else {
+          console.log('To update UI when valid state changes please include _updateUIValidState function in your element.');
+        }
+
+        // set the value to the public property so valid-changed is triggered
+        this._setValid(valid);
+        // return valid state as a convenience
+        return valid;
+      },
+      /**
+       * _checkRequired is a convenience function that checks the required constraint
+       */
+      _checkRequired: function (value) {
+        // coerce this.required to boolean; if element doesn't have required property,
+        // undefined is coerced to false so final result will be valid = true
+        var required = Boolean(this.required);
+        var valid = required && value != undefined && value !== '';
+        // set the _errorMessage when constraint is not satisfied
+        if (!valid) {
+          this._errorMessage = "This field is required.";
+        }
+        // return result;
+        return valid;
+      },
+      /**
+       * _idExternalValid is a private function that checks the external error message constraint
+       */
+      _isExternalValid: function () {
+        // if external error message is undefined or empty element is valid
+        return this.errorMessage == undefined || this.errorMessage === '';
+      }
+    };
+  }(AtFormBehaviors = window.AtFormBehaviors || {}))
+</script>
