@@ -31,23 +31,29 @@
           observer: 'errorMessageChanged'
         }
       },
-      /*
-       * Internal error message<br/>
-       * When an internal constraint is violated this property is populated with the error message
-       */
-      _errorMessage: '',
-      /*
-       * An array of validation functions<br/>
-       * These functions will be called in a loop to compute final value for valid property<br/>
-       * An element that includes this behavior should populate this array with functions
-       * that check internal constraints for that element <br/>
-       * Validation function must return true if the constraint it checks is satisfied. It must return false otherwise.<br/>
-       * NOTE. If you want to create a new array, add boundCheckRequired function to the new array.
-       * Else use Array.push function instead.<br/>
-       * An example of internal constraint would be required, min - max value, etc ...
-       */
-      _validationFunctions: [],
+      // *ij* if private variable is created here shared state is created
+      // unless you are trying to achieve a higher end goal with shared state
+      // do not create private variables here
       ready: function () {
+        // *ij* to provide private variables in behaviors and prevent shared state
+        // private variables must be created here in ready function
+       /*
+        * Internal error message<br/>
+        * When an internal constraint is violated this property is populated with the error message
+        */
+        this._errorMessage: '';
+       /*
+        * An array of validation functions<br/>
+        * These functions will be called in a loop to compute final value for valid property<br/>
+        * An element that includes this behavior should populate this array with functions
+        * that check internal constraints for that element <br/>
+        * Validation function must return true if the constraint it checks is satisfied. It must return false otherwise.<br/>
+        * NOTE. If you want to create a new array, add boundCheckRequired function to the new array.
+        * Else use Array.push function instead.<br/>
+        * An example of internal constraint would be required, min - max value, etc ...
+        */
+        this._validationFunctions = [];
+
         // validation behavior expects that element that its included into has value property
         var hasValue = this.value !== undefined;
         if (hasValue) {
@@ -74,11 +80,11 @@
         // check if external error message is set
         var isExternalValid = this._isExternalValid();
 
-        if (!isHidden || !isDisabled) {
+        if (!isHidden && !isDisabled) {
           // if element is hidden or disabled validation should not be performed. Its valid by default
           this._errorMessage = '';
           var value = this.value;
-          valid = isExternalValid;
+          valid = true;
 
           var i;
           var validationFunctions = this._validationFunctions;
@@ -124,7 +130,7 @@
         // coerce this.required to boolean; if element doesn't have required property,
         // undefined is coerced to false so final result will be valid = true
         var required = Boolean(this.required);
-        var valid = required && value != undefined && value !== '';
+        var valid = !required || (value != undefined && value !== '');
         // set the _errorMessage when constraint is not satisfied
         if (!valid) {
           this._errorMessage = "This field is required.";
