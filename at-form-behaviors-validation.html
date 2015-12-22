@@ -111,6 +111,8 @@
           console.log('Please provide html space for error messages with an html element with id of \'errorHtml\'.');
         }
 
+        valid = valid && isExternalValid;
+
         // update css classes in html
         if (this._updateUIValidState) {
           this._updateUIValidState(valid);
