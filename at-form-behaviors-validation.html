@@ -146,6 +146,11 @@
       _isExternalValid: function () {
         // if external error message is undefined or empty element is valid
         return this.errorMessage == undefined || this.errorMessage === '';
+      },
+      errorMessageChanged: function(newValue, oldValue) {
+        if (this._isReady) {
+          this.validate();
+        }
       }
     };
   }(AtFormBehaviors = window.AtFormBehaviors || {}))
