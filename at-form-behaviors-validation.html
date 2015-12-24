@@ -107,6 +107,12 @@
             // clear error message html
             Polymer.dom(errorHtml).innerHTML = '';
           }
+
+          if (isHidden || isDisabled) {
+            // clear error message html
+            Polymer.dom(errorHtml).innerHTML = '';
+          }
+
         } else {
           console.log('Please provide html space for error messages with an html element with id of \'errorHtml\'.');
         }

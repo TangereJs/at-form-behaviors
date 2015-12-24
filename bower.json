@@ -1,0 +1,7 @@
+{
+  "name": "at-form-behaviors",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#0.8-preview"
+  }
+}
