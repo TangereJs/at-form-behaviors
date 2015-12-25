@@ -31,6 +31,9 @@
           observer: 'errorMessageChanged'
         }
       },
+      // Empty setter is here to prevent exceptions when valid is set from the outside
+      // setting valid from the outside is not allowed
+      set valid(value) {},
       // *ij* if private variable is created here shared state is created
       // unless you are trying to achieve a higher end goal with shared state
       // do not create private variables here
