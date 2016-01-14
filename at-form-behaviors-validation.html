@@ -71,9 +71,10 @@
       },
       /**
        * @function validate
+       * @param {Boolean} clearUIValidState - if true validation errors will be removed from the UI; if false validation errors will be shown
        * @return {Boolean} - true if all validation constraints are satisfied; false otherwise
        */
-      validate: function () {
+      validate: function (clearUIValidState) {
         var valid = true;
 
         // if this.hide is undefined its coerced to false
@@ -122,11 +123,18 @@
 
         valid = isHidden || isDisabled || (valid && isExternalValid);
 
-        // update css classes in html
-        if (this._updateUIValidState) {
-          this._updateUIValidState(valid);
+        if (!clearUIValidState) {
+          // update css classes in html
+          if (this._updateUIValidState) {
+            this._updateUIValidState(valid);
+          } else {
+            console.log('To update UI when valid state changes please include _updateUIValidState function in your element.');
+          }
         } else {
-          console.log('To update UI when valid state changes please include _updateUIValidState function in your element.');
+          Polymer.dom(errorHtml).innerHTML = '';
+          if (this._updateUIValidState) {
+            this._updateUIValidState(true);
+          }
         }
 
         // set the value to the public property so valid-changed is triggered
