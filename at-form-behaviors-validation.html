@@ -71,10 +71,10 @@
       },
       /**
        * @function validate
-       * @param {Boolean} clearUIValidState - if true validation errors will be removed from the UI; if false validation errors will be shown
+       * @param {Boolean} skipUIValidStateUpdate - if true validation errors will be removed from the UI; if false validation errors will be shown
        * @return {Boolean} - true if all validation constraints are satisfied; false otherwise
        */
-      validate: function (clearUIValidState) {
+      validate: function (skipUIValidStateUpdate) {
         var valid = true;
 
         // if this.hide is undefined its coerced to false
@@ -123,7 +123,7 @@
 
         valid = isHidden || isDisabled || (valid && isExternalValid);
 
-        if (!clearUIValidState) {
+        if (!skipUIValidStateUpdate) {
           // update css classes in html
           if (this._updateUIValidState) {
             this._updateUIValidState(valid);
