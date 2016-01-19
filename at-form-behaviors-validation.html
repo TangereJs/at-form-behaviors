@@ -37,24 +37,24 @@
       // *ij* if private variable is created here shared state is created
       // unless you are trying to achieve a higher end goal with shared state
       // do not create private variables here
-      ready: function () {
+      ready: function() {
         // *ij* to provide private variables in behaviors and prevent shared state
         // private variables must be created here in ready function
-       /*
-        * Internal error message<br/>
-        * When an internal constraint is violated this property is populated with the error message
-        */
+        /*
+         * Internal error message<br/>
+         * When an internal constraint is violated this property is populated with the error message
+         */
         this._errorMessage = '';
-       /*
-        * An array of validation functions<br/>
-        * These functions will be called in a loop to compute final value for valid property<br/>
-        * An element that includes this behavior should populate this array with functions
-        * that check internal constraints for that element <br/>
-        * Validation function must return true if the constraint it checks is satisfied. It must return false otherwise.<br/>
-        * NOTE. If you want to create a new array, add boundCheckRequired function to the new array.
-        * Else use Array.push function instead.<br/>
-        * An example of internal constraint would be required, min - max value, etc ...
-        */
+        /*
+         * An array of validation functions<br/>
+         * These functions will be called in a loop to compute final value for valid property<br/>
+         * An element that includes this behavior should populate this array with functions
+         * that check internal constraints for that element <br/>
+         * Validation function must return true if the constraint it checks is satisfied. It must return false otherwise.<br/>
+         * NOTE. If you want to create a new array, add boundCheckRequired function to the new array.
+         * Else use Array.push function instead.<br/>
+         * An example of internal constraint would be required, min - max value, etc ...
+         */
         this._validationFunctions = [];
 
         // validation behavior expects that element that its included into has value property
@@ -71,10 +71,9 @@
       },
       /**
        * @function validate
-       * @param {Boolean} skipUIValidStateUpdate - if true validation errors will be removed from the UI; if false validation errors will be shown
        * @return {Boolean} - true if all validation constraints are satisfied; false otherwise
        */
-      validate: function (skipUIValidStateUpdate) {
+      validate: function() {
         var valid = true;
 
         // if this.hide is undefined its coerced to false
@@ -123,18 +122,11 @@
 
         valid = isHidden || isDisabled || (valid && isExternalValid);
 
-        if (!skipUIValidStateUpdate) {
-          // update css classes in html
-          if (this._updateUIValidState) {
-            this._updateUIValidState(valid);
-          } else {
-            console.log('To update UI when valid state changes please include _updateUIValidState function in your element.');
-          }
+        // update css classes in html
+        if (this._updateUIValidState) {
+          this._updateUIValidState(valid);
         } else {
-          Polymer.dom(errorHtml).innerHTML = '';
-          if (this._updateUIValidState) {
-            this._updateUIValidState(true);
-          }
+          console.log('To update UI when valid state changes please include _updateUIValidState function in your element.');
         }
 
         // set the value to the public property so valid-changed is triggered
@@ -142,10 +134,22 @@
         // return valid state as a convenience
         return valid;
       },
+
+      /**
+       * removes validation errors from the UI
+       */
+      clearUIValidState: function() {
+        var errorHtml = this.$.errorHtml;
+        Polymer.dom(errorHtml).innerHTML = '';
+        if (this._updateUIValidState) {
+          this._updateUIValidState(true);
+        }
+      },
+
       /**
        * _checkRequired is a convenience function that checks the required constraint
        */
-      _checkRequired: function (value) {
+      _checkRequired: function(value) {
         // coerce this.required to boolean; if element doesn't have required property,
         // undefined is coerced to false so final result will be valid = true
         var required = Boolean(this.required);
@@ -160,7 +164,7 @@
       /**
        * _idExternalValid is a private function that checks the external error message constraint
        */
-      _isExternalValid: function () {
+      _isExternalValid: function() {
         // if external error message is undefined or empty element is valid
         return this.errorMessage == undefined || this.errorMessage === '';
       },
