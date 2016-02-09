@@ -29,6 +29,19 @@
           type: String,
           value: '',
           observer: 'errorMessageChanged'
+        },
+        /**
+         * When error message is empty, value of the hint is displayed in hint html
+         * When error message is not empty, value of the errorMessage is displayed instead of hint in hint html
+         * <br/>
+         * @property hint
+         * @type string
+         * @default ''
+         */
+        hint: {
+          type: String,
+          value: '',
+          observer: 'hintChanged'
         }
       },
       // Empty setter is here to prevent exceptions when valid is set from the outside
@@ -98,7 +111,7 @@
           }
         }
 
-        var errorHtml = this.$.errorHtml;
+        var errorHtml = this.$.hint;
         if (errorHtml) {
           if (!isExternalValid) {
             // display the external error messsage
@@ -107,8 +120,12 @@
             // checking internal constraints failed; display internal error message
             Polymer.dom(errorHtml).innerHTML = this._errorMessage;
           } else {
-            // clear error message html
-            Polymer.dom(errorHtml).innerHTML = '';
+            if (this.hint !== "") {
+              Polymer.dom(errorHtml).innerHTML = this.hint;
+            } else {
+              // clear error message html
+              Polymer.dom(errorHtml).innerHTML = '';
+            }
           }
 
           if (isHidden || isDisabled) {
@@ -117,7 +134,7 @@
           }
 
         } else {
-          console.log('Please provide html space for error messages with an html element with id of \'errorHtml\'.');
+          console.log('Please provide html space for error messages with an html element with id of \'hint\'.');
         }
 
         valid = isHidden || isDisabled || (valid && isExternalValid);
@@ -139,8 +156,10 @@
        * removes validation errors from the UI
        */
       clearUIValidState: function() {
-        var errorHtml = this.$.errorHtml;
-        Polymer.dom(errorHtml).innerHTML = '';
+        var hint = this.$.hint;
+        if (hint) {
+          Polymer.dom(hint).innerHTML = '';          
+        }
         if (this._updateUIValidState) {
           this._updateUIValidState(true);
         }
@@ -171,6 +190,16 @@
       errorMessageChanged: function(newValue, oldValue) {
         if (this._isReady) {
           this.validate();
+        }
+      },
+      hintChanged: function (newValue, oldValue) {
+        if (this._isReady) {
+          if (this.valid) {
+            var hint = this.$.hint;
+            if (hint) {
+              Polymer.dom(hint).innerHTML = this.hint;
+            }
+          }
         }
       }
     };
