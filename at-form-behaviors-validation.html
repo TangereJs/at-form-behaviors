@@ -81,6 +81,23 @@
 
         // disabled and hide are not required, because we can coerce them to boolean
         // if coerced value is false it doesn't affect computation of valid state
+
+        // hanlde focusable element
+        var self = this;
+        self._hasFocus = false;
+        if (isFunction(this._getFocusableElement)) {
+          var focusable = this._getFocusableElement();
+          if (focusable) {
+            focusable.addEventListener('focus', function(event) {
+              self._hasFocus = true;
+              self._showHint();
+            });
+            focusable.addEventListener('blur', function(event) {
+              self._hasFocus = false;
+              self._showHint();
+            });
+          }
+        }
       },
       /**
        * @function validate
@@ -111,26 +128,21 @@
           }
         }
 
-        var errorHtml = this.$.hint;
-        if (errorHtml) {
+        var hint = this.$.hint;
+        if (hint) {
           if (!isExternalValid) {
             // display the external error messsage
-            Polymer.dom(errorHtml).innerHTML = this.errorMessage;
+            Polymer.dom(hint).innerHTML = this.errorMessage;
           } else if (!valid) {
             // checking internal constraints failed; display internal error message
-            Polymer.dom(errorHtml).innerHTML = this._errorMessage;
+            Polymer.dom(hint).innerHTML = this._errorMessage;
           } else {
-            if (this.hint !== "") {
-              Polymer.dom(errorHtml).innerHTML = this.hint;
-            } else {
-              // clear error message html
-              Polymer.dom(errorHtml).innerHTML = '';
-            }
+            this._showHint();
           }
 
           if (isHidden || isDisabled) {
             // clear error message html
-            Polymer.dom(errorHtml).innerHTML = '';
+            Polymer.dom(hint).innerHTML = '';
           }
 
         } else {
@@ -140,11 +152,7 @@
         valid = isHidden || isDisabled || (valid && isExternalValid);
 
         // update css classes in html
-        if (this._updateUIValidState) {
-          this._updateUIValidState(valid);
-        } else {
-          console.log('To update UI when valid state changes please include _updateUIValidState function in your element.');
-        }
+        this._callUpdateUIValidState(valid);
 
         // set the value to the public property so valid-changed is triggered
         this._setValid(valid);
@@ -158,10 +166,19 @@
       clearUIValidState: function() {
         var hint = this.$.hint;
         if (hint) {
-          Polymer.dom(hint).innerHTML = '';          
+          Polymer.dom(hint).innerHTML = '';
         }
-        if (this._updateUIValidState) {
-          this._updateUIValidState(true);
+        this._callUpdateUIValidState(true);
+      },
+
+      _callUpdateUIValidState(isValid) {
+        var hint = this.$.hint;
+        this.toggleClass('error', !isValid, hint);
+
+        if (isFunction(this._updateUIValidState)) {
+          this._updateUIValidState(isValid);
+        } else {
+          console.log('To update UI when valid state changes please include _updateUIValidState function in your element.');
         }
       },
 
@@ -195,13 +212,34 @@
       hintChanged: function (newValue, oldValue) {
         if (this._isReady) {
           if (this.valid) {
-            var hint = this.$.hint;
-            if (hint) {
-              Polymer.dom(hint).innerHTML = this.hint;
-            }
+            this._showHint();
           }
+        }
+      },
+      _showHint: function () {
+        var isExternalValid = this._isExternalValid();
+        var hasErrorMessage = this._errorMessage !== "";
+
+        if (!isExternalValid || hasErrorMessage) {
+          return;
+        }
+
+        var hint = this.$.hint;
+        if (hint) {
+          if (this.hint !== "" && this._hasFocus) {
+            Polymer.dom(hint).innerHTML = this.hint;
+          } else {
+            Polymer.dom(hint).innerHTML = '';
+          }
+        } else {
+          console.log('Please provide html space for error messages with an html element with id of \'hint\'.');
         }
       }
     };
+
+    function isFunction(obj) {
+      return Object.prototype.toString.call(obj) === "[object Function]";
+    }
+
   }(AtFormBehaviors = window.AtFormBehaviors || {}))
 </script>
