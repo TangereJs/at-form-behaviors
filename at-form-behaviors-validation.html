@@ -82,6 +82,9 @@
         // disabled and hide are not required, because we can coerce them to boolean
         // if coerced value is false it doesn't affect computation of valid state
 
+        this._attachFocusBlurEvents();
+      },
+      _attachFocusBlurEvents: function () {
         // hanlde focusable element
         var self = this;
         self._hasFocus = false;
