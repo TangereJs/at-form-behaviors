@@ -94,11 +94,11 @@
             focusable.addEventListener('focus', function(event) {
               self._hasFocus = true;
               self._showHint();
-            });
+            }, true);
             focusable.addEventListener('blur', function(event) {
               self._hasFocus = false;
               self._showHint();
-            });
+            }, true);
           }
         }
       },
