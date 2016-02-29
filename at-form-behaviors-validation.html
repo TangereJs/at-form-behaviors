@@ -1,6 +1,9 @@
+<link rel="import" href="../tangere/Tangere.html">
+
+
 <script>
-  (function(namespace) {
-    namespace.AtFormBehaviorsValidation = {
+
+    Tangere.behaviors.formValidation = {
       properties: {
         /**
          * When true element's value is valid as in satisfies all constraints, both internal and extermal<br/>
@@ -194,8 +197,8 @@
         var required = Boolean(this.required);
         var valid = !required || (value != undefined && value !== '');
         // set the _errorMessage when constraint is not satisfied
-        if (!valid) {
-          this._errorMessage = "This field is required.";
+        if (!valid) {          
+          this._errorMessage = this.T("This field is required.");
         }
         // return result;
         return valid;
@@ -244,5 +247,7 @@
       return Object.prototype.toString.call(obj) === "[object Function]";
     }
 
-  }(AtFormBehaviors = window.AtFormBehaviors || {}))
+  // the following 2 lines need to be removed as soon as all at-form-* elements are updated to use Tangere.behaviors.formValidation
+  window.AtFormBehaviors = window.AtFormBehaviors || {};
+  window.AtFormBehaviors.AtFormBehaviorsValidation = Tangere.behaviors.formValidation;
 </script>
