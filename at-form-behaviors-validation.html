@@ -31,7 +31,8 @@
         errorMessage: {
           type: String,
           value: '',
-          observer: 'errorMessageChanged'
+          observer: 'errorMessageChanged',
+          title: 'Error message'
         },
         /**
          * When error message is empty, value of the hint is displayed in hint html
@@ -44,7 +45,8 @@
         hint: {
           type: String,
           value: '',
-          observer: 'hintChanged'
+          observer: 'hintChanged',
+          title: 'Hint text'
         }
       },
       // Empty setter is here to prevent exceptions when valid is set from the outside
@@ -197,7 +199,7 @@
         var required = Boolean(this.required);
         var valid = !required || (value != undefined && value !== '');
         // set the _errorMessage when constraint is not satisfied
-        if (!valid) {          
+        if (!valid) {
           this._errorMessage = this.T("This field is required.");
         }
         // return result;
