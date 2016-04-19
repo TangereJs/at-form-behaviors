@@ -1,0 +1,129 @@
+<link rel="import" href="../tangere/tangere.html">
+
+<script>
+  (function(module) {
+    'use strict';
+
+    function isObject(obj) {
+      return Object.prototype.toString.apply(obj) === "[object Object]";
+    }
+
+    function isArray(obj) {
+      return Object.prototype.toString.apply(obj) === "[object Array]";
+    }
+
+    function shallowCopy(source, destination) {
+      var srcPropNames = Object.keys(source);
+      srcPropNames.forEach(function(srcPropName, index) {
+        destination[srcPropName] = source[srcPropName];
+      });
+    }
+
+    function deepCopy(source, destination) {
+      var srcPropNames = Object.keys(source);
+      srcPropNames.forEach(function(srcPropName, index) {
+        var srcProp = source[srcPropName];
+        if (schemaHelpers.isObject(srcProp)) {
+          destination[srcPropName] = {};
+          deepCopy(srcProp, destination[srcPropName]);
+        } else {
+          destination[srcPropName] = source[srcPropName];
+        }
+      });
+    }
+
+    module.RulesEvaluation = {
+      properties: {
+        /**
+         * @property _activeSchema - a copy of .schema from at-core-form and at-form-complex
+         */
+        _activeSchema: {
+          type: Object,
+          value: function() {
+            return null;
+          }
+        },
+        _rulesEvaluator: {
+          type: Object,
+          value: function () {
+            return null;
+          }
+        }
+      },
+      ready: function() {
+
+      },
+      _evaluateRules: function(values) {
+        // we operate under following assumptions
+        // this.schema property exists
+        // and has .properties property
+        var schema = this.schema;
+        // schema must be an object and must have properties property which also must be an object
+        var schemaExists = isObject(schema) && isObject(schema.properties);
+        if (!schemaExists) {
+          return;
+        }
+        // if schema doesn't have any properties just return
+        var schemaHasProps = Object.keys(schema.properties).length > 0;
+        if (!schemaHasProps) {
+          return;
+        }
+
+        // and has .rules property
+        var rules = schema.rules;
+        var rulesExist = isArray(rules);
+        if (!rulesExist) {
+          return;
+        }
+        var rulesEmpty = rules.length === 0;
+        if (rulesEmpty) {
+          return;
+        }
+
+        // initialize activeSchema
+        var activeSchema = this._activeSchema;
+        if (activeSchema === null) {
+          activeSchema = {
+            properties: {}
+          };
+          deepCopy(this.schema.properties, activeSchema.properties);
+          this._activeSchema = activeSchema;
+        }
+
+        // initialize rulesEvaluator
+        var rulesEvaluator = this._rulesEvaluator;
+        if (rulesEvaluator === null) {
+          rulesEvaluator = this._rulesEvaluator = RulesEvaluator();
+        }
+
+        // create a copy of values that rules will update
+        var rulesValues = {};
+        shallowCopy(values, rulesValues);
+
+        rulesEvaluator.evaluate(activeSchema, rulesValues, rules);
+
+        // now we have updated active schema and updated rulesValues
+        // we can now update element state based on active schema
+        var schemaJson = JSON.stringify(schema.properties);
+        var activeSchemaJson = JSON.stringify(activeSchema.properties);
+        if (activeSchemaJson !== schemaJson) {
+          var setStateFn = this.setElementState || this.setFieldState;
+          // for each property update disaabled/hidden/required and errorMessage;
+          // because actions only update those states
+          var activePropNames = Object.keys(activeSchema.properties);
+          activePropNames.forEach(function (activePropName, index) {
+            var activePropDef = activeSchema.properties[activePropName];
+            setStateFn(activePropName, 'disabled', activePropDef.disabled);
+            setStateFn(activePropName, 'required', activePropDef.required);
+            setStateFn(activePropName, 'hide', activePropDef.hide);
+            setStateFn(activePropName, 'errorMessage', activePropDef.errorMessage);
+          });
+        }
+
+
+
+      }
+    };
+
+  }(window.Tangere.behaviors = window.Tangere.behaviors || {}));
+</script>
