@@ -53,7 +53,7 @@
       ready: function() {
 
       },
-      _evaluateRules: function(values) {
+      _evaluateRules: function(values, propertyName, propertyValue) {
         // we operate under following assumptions
         // this.schema property exists
         // and has .properties property
@@ -120,8 +120,53 @@
           });
         }
 
+        // originalValue is either at-core-form.data or at-form-complex.value
+        var originalValue = this.value || this.data;
 
-
+        var valuesJsonStr = JSON.stringify(values);
+        var rulesValuesJsonStr = JSON.stringify(rulesValues);
+        if (valuesJsonStr !== rulesValuesJsonStr) {
+          // to update the field value in the html function names are
+          // updateFormElementValue in at-form-complex or updateFormElementData in at-core-form
+          var updateElementValueFn = this.updateFormElementValue || this.updateFormElementData;
+          var rv_PropNames = Object.keys(rulesValues);
+          rv_PropNames.forEach(function(rv_PropName, index) {
+            var vPropValue = values[rv_PropName];
+            var rvPropValue = rulesValues[rv_PropName];
+            if (vPropValue !== rvPropValue) {
+              originalValue[rv_PropName] = rvPropValue;
+              updateElementValueFn(rv_PropName, rvPropValue);
+            } else {
+              originalValue[rv_PropName] = vPropValue;
+              updateElementValueFn(rv_PropName, vPropValue);
+            }
+          });
+          if (this.is === "at-form-complex") {
+            // trigger value-changed because of R4
+            this.fire('value-changed', {
+              value: this.value
+            });
+          } else if (this.is === "at-core-form") {
+            this.fire('data-changed', {
+              value: this.data
+            });
+          }
+        } else {
+          originalValue[propertyName] = propertyValue;
+          // update valid state
+          var updateValidStateFn = this._updateValidState || this._calculateFormValidState;
+          updateValidStateFn();
+          if (this.is === "at-form-complex") {
+            // trigger value-changed because of R4
+            this.fire('value-changed', {
+              value: this.value
+            });
+          } else if (this.is === "at-core-form") {
+            this.fire('data-changed', {
+              value: this.data
+            });
+          }
+        }
       }
     };
 
