@@ -53,7 +53,7 @@
       ready: function() {
 
       },
-      _evaluateRules: function(values, propertyName, propertyValue) {
+      _evaluateRules: function(propertyName, propertyValue) {
         // we operate under following assumptions
         // this.schema property exists
         // and has .properties property
@@ -96,12 +96,21 @@
           rulesEvaluator = this._rulesEvaluator = RulesEvaluator();
         }
 
+        // originalValue is either at-core-form.data or at-form-complex.value
+        var originalValue = this.value || this.data;
+
+        // create a copy of this.value that is updated with user data
+        var values = {};
+        deepCopy(originalValue, values);
+        values[propertyName] = propertyValue;
+
         // create a copy of values that rules will update
         var rulesValues = {};
-        shallowCopy(values, rulesValues);
+        deepCopy(values, rulesValues);
 
         rulesEvaluator.evaluate(activeSchema, rulesValues, rules);
 
+        var self = this;
         // now we have updated active schema and updated rulesValues
         // we can now update element state based on active schema
         var schemaJson = JSON.stringify(schema.properties);
@@ -113,15 +122,12 @@
           var activePropNames = Object.keys(activeSchema.properties);
           activePropNames.forEach(function (activePropName, index) {
             var activePropDef = activeSchema.properties[activePropName];
-            setStateFn(activePropName, 'disabled', activePropDef.disabled);
-            setStateFn(activePropName, 'required', activePropDef.required);
-            setStateFn(activePropName, 'hide', activePropDef.hide);
-            setStateFn(activePropName, 'errorMessage', activePropDef.errorMessage);
+            setStateFn.apply(self, [activePropName, 'disabled', activePropDef.disabled]);
+            setStateFn.apply(self, [activePropName, 'required', activePropDef.required]);
+            setStateFn.apply(self, [activePropName, 'hide', activePropDef.hide]);
+            setStateFn.apply(self, [activePropName, 'errorMessage', activePropDef.errorMessage]);
           });
         }
-
-        // originalValue is either at-core-form.data or at-form-complex.value
-        var originalValue = this.value || this.data;
 
         var valuesJsonStr = JSON.stringify(values);
         var rulesValuesJsonStr = JSON.stringify(rulesValues);
@@ -135,10 +141,10 @@
             var rvPropValue = rulesValues[rv_PropName];
             if (vPropValue !== rvPropValue) {
               originalValue[rv_PropName] = rvPropValue;
-              updateElementValueFn(rv_PropName, rvPropValue);
+              updateElementValueFn.apply(self, [rv_PropName, rvPropValue]);
             } else {
               originalValue[rv_PropName] = vPropValue;
-              updateElementValueFn(rv_PropName, vPropValue);
+              updateElementValueFn.apply(self, [rv_PropName, vPropValue]);
             }
           });
           if (this.is === "at-form-complex") {
@@ -155,7 +161,7 @@
           originalValue[propertyName] = propertyValue;
           // update valid state
           var updateValidStateFn = this._updateValidState || this._calculateFormValidState;
-          updateValidStateFn();
+          updateValidStateFn.apply(this);
           if (this.is === "at-form-complex") {
             // trigger value-changed because of R4
             this.fire('value-changed', {
