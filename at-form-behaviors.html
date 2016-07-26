@@ -197,7 +197,7 @@
         // coerce this.required to boolean; if element doesn't have required property,
         // undefined is coerced to false so final result will be valid = true
         var required = Boolean(this.required);
-        var valid = !required || (value != undefined && value !== '');
+        var valid = !required || ([undefined, null, ""].indexOf(value) === -1);
         // set the _errorMessage when constraint is not satisfied
         if (!valid) {
           this._errorMessage = this.T("This field is required.");
