@@ -112,7 +112,6 @@
        * @return {Boolean} - true if all validation constraints are satisfied; false otherwise
        */
       validate: function() {
-        console.log("at-form-behaviors/at-form-behaviors-validation.html is deprecated. Use at-form-behaviors/at-form-behaviors.html instead");
         var valid = true;
 
         // if this.hide is undefined its coerced to false
@@ -243,6 +242,13 @@
         } else {
           console.log('Please provide html space for error messages with an html element with id of \'hint\'.');
         }
+      },
+      _fireValueChangedEvent: function (value) {
+        this.fire('value-changed', {
+          value: value
+        }, {
+          bubbles: false
+        });
       }
     };
 
