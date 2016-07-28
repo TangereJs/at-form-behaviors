@@ -3,7 +3,7 @@
 
 <script>
 
-    Tangere.behaviors.formValidation = {
+    Tangere.behaviors.formUIGeneric = {
       properties: {
         /**
          * When true element's value is valid as in satisfies all constraints, both internal and extermal<br/>
@@ -111,8 +111,11 @@
        * @function validate
        * @return {Boolean} - true if all validation constraints are satisfied; false otherwise
        */
-      validate: function() {
-        var valid = true;
+      _validateBaseData: function() {
+        var validationResult = {
+          isValid: true,
+          errorMessage: ""
+        }
 
         // if this.hide is undefined its coerced to false
         var isHidden = Boolean(this.hide);
@@ -121,51 +124,27 @@
         // check if external error message is set
         var isExternalValid = this._isExternalValid();
 
-        if (!isHidden && !isDisabled) {
-          // if element is hidden or disabled validation should not be performed. Its valid by default
-          this._errorMessage = '';
-          var value = this.value;
-          valid = true;
-
-          var i;
-          var validationFunctions = this._validationFunctions;
-          var length = validationFunctions.length;
-          for (var i = 0; valid && i < length; i++) {
-            var validationFunction = validationFunctions[i];
-            valid = valid && validationFunction(value);
-          }
+        validationResult.isValid = isHidden || isDisabled || isExternalValid;
+        if (!isExternalValid) {
+          validationResult.errorMessage = this.errorMessage;
         }
 
+        return validationResult;
+      },
+
+      _handleValidationResult: function (validationResult) {
         var hint = this.$.hint;
         if (hint) {
-          if (!isExternalValid) {
-            // display the external error messsage
-            Polymer.dom(hint).innerHTML = this.errorMessage;
-          } else if (!valid) {
-            // checking internal constraints failed; display internal error message
-            Polymer.dom(hint).innerHTML = this._errorMessage;
-          } else {
-            this._showHint();
-          }
-
-          if (isHidden || isDisabled) {
-            // clear error message html
-            Polymer.dom(hint).innerHTML = '';
-          }
-
+          Polymer.dom(hint).innerHTML = validationResult.errorMessage;
         } else {
           console.log('Please provide html space for error messages with an html element with id of \'hint\'.');
         }
-
-        valid = isHidden || isDisabled || (valid && isExternalValid);
-
+        
         // update css classes in html
-        this._callUpdateUIValidState(valid);
+        this._callUpdateUIValidState(validationResult.isValid);
 
         // set the value to the public property so valid-changed is triggered
-        this._setValid(valid);
-        // return valid state as a convenience
-        return valid;
+        this._setValid(validationResult.isValid);
       },
 
       /**
