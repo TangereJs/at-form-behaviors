@@ -5,21 +5,7 @@
 
     Tangere.behaviors.formUIGeneric = {
       properties: {
-        /**
-         * When true element's value is valid as in satisfies all constraints, both internal and extermal<br/>
-         * When false element's value doens't satisfy at least one external constraint or at least one internal constraint
-         * <br/>
-         * NOTE. This property is read only.
-         * @property valid
-         * @type Boolean
-         * @default true
-         */
-        valid: {
-          type: Boolean,
-          value: true,
-          readOnly: true,
-          notify: true
-        },
+
         /**
          * When error message is not empty, element's value is invalid <br/>
          * Internal constraints and error messages are ignored
@@ -51,6 +37,9 @@
       },
       // Empty setter is here to prevent exceptions when valid is set from the outside
       // setting valid from the outside is not allowed
+      get valid() {
+        return this.validate();
+      },
       set valid(value) {},
       // *ij* if private variable is created here shared state is created
       // unless you are trying to achieve a higher end goal with shared state
@@ -113,8 +102,9 @@
        */
       _validateBaseData: function() {
         var validationResult = {
-          isValid: true,
-          errorMessage: ""
+          isValid: false,
+          errorMessage: "",
+          isFinal: false  // no more validation happens when true
         }
 
         // if this.hide is undefined its coerced to false
@@ -124,11 +114,13 @@
         // check if external error message is set
         var isExternalValid = this._isExternalValid();
 
+        validationResult.isFinal = isHidden || isDisabled;
         validationResult.isValid = isHidden || isDisabled || isExternalValid;
         if (!isExternalValid) {
           validationResult.errorMessage = this.errorMessage;
+          validationResult.isFinal = true;
         }
-
+        
         return validationResult;
       },
 
@@ -143,8 +135,6 @@
         // update css classes in html
         this._callUpdateUIValidState(validationResult.isValid);
 
-        // set the value to the public property so valid-changed is triggered
-        this._setValid(validationResult.isValid);
       },
 
       /**
