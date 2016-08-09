@@ -33,14 +33,26 @@
           value: '',
           observer: 'hintChanged',
           title: 'Hint text'
+        },
+        /**        
+         * Enables automatic validation user input
+         * <br/>
+         * @property autovalidate
+         * @type Boolean
+         * @default false
+         */
+        autovalidate: {
+          type: Boolean,
+          value: false,          
+          title: 'Automatic validation of user input'
         }
       },
       // Empty setter is here to prevent exceptions when valid is set from the outside
       // setting valid from the outside is not allowed
-      get valid() {
-        return this.validate();
-      },
       set valid(value) {},
+      get valid() {
+        return this.validate(false);
+      },
       // *ij* if private variable is created here shared state is created
       // unless you are trying to achieve a higher end goal with shared state
       // do not create private variables here
@@ -140,7 +152,7 @@
       /**
        * removes validation errors from the UI
        */
-      clearUIValidState: function() {
+      _clearUIValidState: function() {
         var hint = this.$.hint;
         if (hint) {
           Polymer.dom(hint).innerHTML = '';
