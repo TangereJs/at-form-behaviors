@@ -34,7 +34,7 @@
           observer: 'hintChanged',
           title: 'Hint text'
         },
-        /**        
+        /**
          * Enables automatic validation user input
          * <br/>
          * @property autovalidate
@@ -43,7 +43,7 @@
          */
         autovalidate: {
           type: Boolean,
-          value: false,          
+          value: false,
           title: 'Automatic validation of user input'
         }
       },
@@ -115,24 +115,17 @@
       _validateBaseData: function() {
         var validationResult = {
           isValid: false,
-          errorMessage: "",
-          isFinal: false  // no more validation happens when true
+          errorMessage: ""
         }
 
-        // if this.hide is undefined its coerced to false
-        var isHidden = Boolean(this.hide);
-        // if this.disabled is undefined its coerced to false
-        var isDisabled = Boolean(this.disabled);
         // check if external error message is set
         var isExternalValid = this._isExternalValid();
 
-        validationResult.isFinal = isHidden || isDisabled;
-        validationResult.isValid = isHidden || isDisabled || isExternalValid;
+        validationResult.isValid = isExternalValid;
         if (!isExternalValid) {
           validationResult.errorMessage = this.errorMessage;
-          validationResult.isFinal = true;
         }
-        
+
         return validationResult;
       },
 
@@ -143,7 +136,7 @@
         } else {
           console.log('Please provide html space for error messages with an html element with id of \'hint\'.');
         }
-        
+
         // update css classes in html
         this._callUpdateUIValidState(validationResult.isValid);
 
