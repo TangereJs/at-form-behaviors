@@ -131,6 +131,8 @@
 
       _handleValidationResult: function (validationResult) {
         var hint = this.$.hint;
+        this._errorMessage = validationResult.errorMessage;
+
         if (hint) {
           Polymer.dom(hint).innerHTML = validationResult.errorMessage;
         } else {
@@ -199,22 +201,19 @@
         }
       },
       _showHint: function () {
-        var isExternalValid = this._isExternalValid();
-        var hasErrorMessage = this._errorMessage !== "";
-
-        if (!isExternalValid || hasErrorMessage) {
-          return;
+        var hint = this.$.hint;
+        if (!hint) {
+          console.log('Please provide html space for error messages with an html element with id of \'hint\'.');
         }
 
-        var hint = this.$.hint;
-        if (hint) {
-          if (this.hint !== "" && this._hasFocus) {
-            Polymer.dom(hint).innerHTML = this.hint;
-          } else {
-            Polymer.dom(hint).innerHTML = '';
-          }
+        if (this.hint !== "" && this._hasFocus) {
+          Polymer.dom(hint).textContent = this.hint;
         } else {
-          console.log('Please provide html space for error messages with an html element with id of \'hint\'.');
+          if (this._errorMessage === "") {
+            Polymer.dom(hint).textContent = '';
+          } else {
+            Polymer.dom(hint).textContent = this._errorMessage;
+          }
         }
       },
       _fireValueChangedEvent: function (value) {
