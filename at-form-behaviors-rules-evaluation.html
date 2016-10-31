@@ -160,7 +160,7 @@
         } else {
           originalValue[propertyName] = propertyValue;
           // update valid state
-          var updateValidStateFn = this._updateValidState || this._calculateFormValidState;
+          var updateValidStateFn = this.validate || this._calculateFormValidState;
           updateValidStateFn.apply(this);
           if (this.is === "at-form-complex") {
             // trigger value-changed because of R4
