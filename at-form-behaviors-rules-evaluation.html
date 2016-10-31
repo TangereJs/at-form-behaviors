@@ -122,9 +122,10 @@
           var activePropNames = Object.keys(activeSchema.properties);
           activePropNames.forEach(function (activePropName, index) {
             var activePropDef = activeSchema.properties[activePropName];
-            setStateFn.apply(self, [activePropName, 'disabled', activePropDef.disabled]);
-            setStateFn.apply(self, [activePropName, 'required', activePropDef.required]);
-            setStateFn.apply(self, [activePropName, 'hide', activePropDef.hide]);
+            setStateFn.apply(self, [activePropName, 'disabled', !!activePropDef.disabled]);
+            setStateFn.apply(self, [activePropName, 'required', !!activePropDef.required]);
+            setStateFn.apply(self, [activePropName, 'hide', !!activePropDef.hide]);
+            activePropDef.errorMessage = !activePropDef.errorMessage ? "" : activePropDef.errorMessage;
             setStateFn.apply(self, [activePropName, 'errorMessage', activePropDef.errorMessage]);
           });
         }

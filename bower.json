@@ -4,5 +4,5 @@
   "dependencies": {
     "polymer": "TangereJs/tangere#0.8-preview"
   },
-  "version": "0.0.1.4"
+  "version": "0.0.1.8"
 }
