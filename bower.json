@@ -2,7 +2,7 @@
   "name": "at-form-behaviors",
   "private": true,
   "dependencies": {
-    "polymer": "TangereJs/tangere#0.8-preview"
+    "tangere": "TangereJs/tangere#0.8-preview"
   },
   "version": "0.0.1.8"
 }
