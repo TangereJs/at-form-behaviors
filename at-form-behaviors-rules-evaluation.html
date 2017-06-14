@@ -75,30 +75,15 @@
         if (!rulesExist) {
           return;
         }
+        // if rules are empty just return
         var rulesEmpty = rules.length === 0;
         if (rulesEmpty) {
           return;
         }
 
-        // WIP to meet demands of AT-340 we keep the original schema around
-        if (!this._originalSchema) {
-          this._originalSchema = { properties: {} };
-          deepCopy(this.schema.properties, this._originalSchema.properties);
-        }
-
-        // initialize activeSchema
-        var activeSchema = this._activeSchema;
-        if (activeSchema === null) {
-          activeSchema = {
-            properties: {}
-          };
-          deepCopy(this.schema.properties, activeSchema.properties);
-          this._activeSchema = activeSchema;
-        }
-
-        // WIP to meet demands of AT-340 we always copy original schema to active schema
-        // this begs the question if concept of active schema is still relevant
-        deepCopy(this._originalSchema.properties, activeSchema.properties);
+        // initialize activeSchema as a copy of current elements' schema
+        var activeSchema = { properties: {} };
+        deepCopy(this.schema.properties, activeSchema.properties);
 
         // initialize rulesEvaluator
         var rulesEvaluator = this._rulesEvaluator;
@@ -120,27 +105,21 @@
 
         rulesEvaluator.evaluate(activeSchema, rulesValues, rules);
 
-        var self = this;
-        // now we have updated active schema and updated rulesValues
-        // we can now update element state based on active schema
-        // var schemaJson = JSON.stringify(schema.properties);
-        // var activeSchemaJson = JSON.stringify(activeSchema.properties);
+        // apply the modified active schema to element
+        var self = this;        
+        var setStateFn = this.setElementState || this.setFieldState;
+        // for each property update disaabled/hidden/required and errorMessage;
+        // because actions only update those states
+        var activePropNames = Object.keys(activeSchema.properties);
+        activePropNames.forEach(function (activePropName, index) {
+          var activePropDef = activeSchema.properties[activePropName];
+          setStateFn.apply(self, [activePropName, 'disabled', !!activePropDef.disabled]);
+          setStateFn.apply(self, [activePropName, 'required', !!activePropDef.required]);
+          setStateFn.apply(self, [activePropName, 'hide', !!activePropDef.hide]);
+          activePropDef.errorMessage = !activePropDef.errorMessage ? "" : activePropDef.errorMessage;
+          setStateFn.apply(self, [activePropName, 'errorMessage', activePropDef.errorMessage]);
+        });
 
-        // WIP to meet demands of AT-340 we always apply calculated active schema
-        //if (activeSchemaJson !== schemaJson) {
-          var setStateFn = this.setElementState || this.setFieldState;
-          // for each property update disaabled/hidden/required and errorMessage;
-          // because actions only update those states
-          var activePropNames = Object.keys(activeSchema.properties);
-          activePropNames.forEach(function (activePropName, index) {
-            var activePropDef = activeSchema.properties[activePropName];
-            setStateFn.apply(self, [activePropName, 'disabled', !!activePropDef.disabled]);
-            setStateFn.apply(self, [activePropName, 'required', !!activePropDef.required]);
-            setStateFn.apply(self, [activePropName, 'hide', !!activePropDef.hide]);
-            activePropDef.errorMessage = !activePropDef.errorMessage ? "" : activePropDef.errorMessage;
-            setStateFn.apply(self, [activePropName, 'errorMessage', activePropDef.errorMessage]);
-          });
-        //}
 
         var valuesJsonStr = JSON.stringify(values);
         var rulesValuesJsonStr = JSON.stringify(rulesValues);
