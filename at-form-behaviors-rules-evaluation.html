@@ -120,6 +120,7 @@
           setStateFn.apply(self, [activePropName, 'errorMessage', activePropDef.errorMessage]);
         });
 
+        this._activeSchema = activeSchema;
 
         var valuesJsonStr = JSON.stringify(values);
         var rulesValuesJsonStr = JSON.stringify(rulesValues);
