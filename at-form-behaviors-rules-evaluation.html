@@ -144,7 +144,7 @@
             // trigger value-changed because of R4
             this.fire('value-changed', {
               value: this.value
-            });
+            }, { bubbles: false });
           } else if (this.is === "at-core-form") {
             this.fire('data-changed', {
               value: this.data
@@ -159,7 +159,7 @@
             // trigger value-changed because of R4
             this.fire('value-changed', {
               value: this.value
-            });
+            }, { bubbles: false });
           } else if (this.is === "at-core-form") {
             this.fire('data-changed', {
               value: this.data
