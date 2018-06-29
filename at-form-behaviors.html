@@ -130,7 +130,7 @@
       },
 
       _handleValidationResult: function (validationResult) {
-        var hint = this.$.hint;
+        var hint = this.$ && this.$.hint;
         this._errorMessage = validationResult.errorMessage;
 
         if (hint) {
@@ -148,7 +148,7 @@
        * removes validation errors from the UI
        */
       _clearUIValidState: function() {
-        var hint = this.$.hint;
+        var hint = this.$ && this.$.hint;
         if (hint) {
           Polymer.dom(hint).innerHTML = '';
         }
@@ -156,7 +156,7 @@
       },
 
       _callUpdateUIValidState: function(isValid) {
-        var hint = this.$.hint;
+        var hint = this.$ && this.$.hint;
         this.toggleClass('error', !isValid, hint);
 
         if (isFunction(this._updateUIValidState)) {
