@@ -154,7 +154,8 @@
           originalValue[propertyName] = propertyValue;
           // update valid state
           var updateValidStateFn = this.validate || this._calculateFormValidState;
-          updateValidStateFn.apply(this);
+          // rule evaluation should not cause validation errors to display in the UI
+          updateValidStateFn.apply(this, [false]);
           if (this.is === "at-form-complex") {
             // trigger value-changed because of R4
             this.fire('value-changed', {
